@@ -6,6 +6,12 @@ const {
   deleteproductbyid,
   updateproductbyid,
   filter,
+  getallusers,
+  getuserbyid,
+  createuser,
+  updateuser,
+  createPost,
+  getAllPosts,
 } = require("./config/connectToSQL");
 const app = express();
 
@@ -57,6 +63,43 @@ app.put("/products/:id", async (req, res) => {
     return res.status(404).json({ message: "not found" });
   }
   res.json({ message: "updated successfully" });
+});
+app.get("/users", async (req, res) => {
+  const users = await getallusers();
+  res.json(users);
+});
+
+app.get("/users/:id", async (req, res) => {
+  const { id } = req.params;
+  const user = await getuserbyid(id);
+  if (!user) return res.status(404).json({ message: "not found" });
+  res.json(user);
+});
+
+app.post("/users", async (req, res) => {
+  const { name } = req.body;
+  const user = await createuser(name);
+  res.status(201).json(user);
+});
+
+app.put("/users/:id", async (req, res) => {
+  const { id } = req.params;
+  const { name } = req.body;
+  const result = await updateuser(id, name);
+  if (result.affectedRows === 0)
+    return res.status(404).json({ message: "not found" });
+  res.json({ message: "User updated" });
+});
+
+app.get("/posts", async (req, res) => {
+  const posts = await getAllPosts();
+  res.json(posts);
+});
+
+app.post("/posts", async (req, res) => {
+  const { title, content, user_id } = req.body;
+  const result = await createPost(title, content, user_id);
+  res.status(201).json({ message: "Post created", postId: result.insertId });
 });
 
 app.listen(3000, () => {

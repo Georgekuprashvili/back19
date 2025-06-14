@@ -77,6 +77,45 @@ const filter = async (pricefrom, priceto, available) => {
   return result;
 };
 
+const getallusers = async () => {
+  const [result] = await pool.query("SELECT * FROM users");
+  return result;
+};
+const getuserbyid = async (id) => {
+  const [userRows] = await pool.query("SELECT * FROM users WHERE id =?", [id]);
+  const user = userRows[0];
+  const [postRows] = await pool.query(
+    "SELECT id,title,content FROM posts WHERE user_id = ?",
+    [id]
+  );
+  user.post = postRows;
+  return user;
+};
+const createuser = async (name) => {
+  const [result] = await pool.query("INSERT INTO users (name) VALUES (?)", [
+    name,
+  ]);
+  return getuserbyid(result.insertId);
+};
+const updateuser = async (id, name) => {
+  const [result] = await pool.query("UPDATE users SET name = ? WHERE id = ?", [
+    name,
+    id,
+  ]);
+  return result;
+};
+const createPost = async (title, content, user_id) => {
+  const [result] = await pool.query(
+    "INSERT INTO posts (title, content, user_id) VALUES (?, ?, ?)",
+    [title, content, user_id]
+  );
+  return result;
+};
+const getAllPosts = async () => {
+  const [result] = await pool.query("SELECT * FROM posts");
+  return result;
+};
+
 module.exports = {
   getallproducts,
   getproductbyid,
@@ -84,4 +123,10 @@ module.exports = {
   deleteproductbyid,
   updateproductbyid,
   filter,
+  getallusers,
+  getuserbyid,
+  createuser,
+  updateuser,
+  createPost,
+  getAllPosts,
 };
